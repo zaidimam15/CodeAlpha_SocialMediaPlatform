@@ -24,6 +24,8 @@ logs/
 # Uploads and temporary files
 uploads/*
 !uploads/.gitkeep
+server/uploads/*
+!server/uploads/.gitkeep
 temp/
 coverage/
 

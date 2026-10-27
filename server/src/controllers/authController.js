@@ -37,7 +37,11 @@ export async function register(req, res, next) {
     });
 
     if (existingUser) {
-      if (existingUser.email.toLowerCase() === email.toLowerCase()) {
+      if (
+        existingUser.email &&
+        email &&
+        existingUser.email.toLowerCase() === email.toLowerCase()
+      ) {
         return res.status(409).json({
           success: false,
           message: 'An account with this email address already exists.',

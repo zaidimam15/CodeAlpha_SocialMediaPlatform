@@ -17,6 +17,7 @@
     "test": "npm run test --prefix server && npm run test --prefix client",
     "test:server": "npm run test --prefix server",
     "test:client": "npm run test --prefix client",
+    "test:live": "node scripts/verify-live-qa.js",
     "seed": "npm run seed --prefix server"
   },
   "keywords": ["social-media", "mern", "react", "express", "mongodb", "socketio", "fullstack"],

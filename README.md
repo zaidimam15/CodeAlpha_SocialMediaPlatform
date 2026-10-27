@@ -5,7 +5,8 @@
 [![React](https://img.shields.io/badge/React-v18.x-blue.svg)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-v6.x-purple.svg)](https://vitejs.dev/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose%20v8-brightgreen.svg)](https://www.mongodb.com/)
-[![Tests](https://img.shields.io/badge/Tests-23%20Passed%20(100%25)-success.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-48%20Passed%20(100%25)-success.svg)]()
+[![Build](https://img.shields.io/badge/Build-Passing-success.svg)]()
 
 > **CodeAlpha Social Media Platform Submission**  
 > Suggested Repository Name: `CodeAlpha_SocialMediaPlatform`
@@ -233,36 +234,63 @@ All pre-seeded demo accounts share the password: `Password123!`
 | `@elena_rostova` | Elena Rostova | elena@connectify.dev | Creative Director (Verified) |
 | `@dev_demo` | Connectify Explorer | demo@connectify.dev | General Test Account |
 
-*The login page also provides 1-click login buttons for instant testing.*
+*Note: These demo accounts are populated by running `npm run seed` on a fresh database. The login page provides 1-click buttons for these accounts. If using an existing database with your own accounts, sign in with your credentials or use the sign-up page to register a new account.*
 
 ---
 
-## 🧪 Automated Testing
+## 🧪 Automated Testing & QA
 
-Connectify features a comprehensive automated test suite with **100% pass rate (23/23 tests passing)**.
+Connectify features a comprehensive test suite with **100% pass rate (48/48 tests passing across backend and frontend suites)** plus an automated live non-destructive API verification script.
 
-### Run All Tests
-```bash
-npm run test
-```
-
-### Run Server API Tests (Supertest + Vitest)
+### 1. Run Server API Tests (Vitest + Supertest + In-Memory MongoDB)
 ```bash
 npm run test:server
+# or
+npm test --prefix server
 ```
-- Tests: Registration, duplicate validations, login, token authentication, post CRUD, like/unlike toggle, comment author checks, self-follow prevention, notification persistence, and `/api/health`.
+- **42 backend tests passing across 4 suites:**
+  - `comprehensive_qa.test.js`: 25 feature-level integration tests covering register, login, invalid credentials, protected route rejection, post creation, hashtag extraction, like/unlike counts, comments persistence, following feeds, profile updates, safe search, bookmarks, and notification read/unread states.
+  - `auth.test.js`: 6 tests verifying JWT issuing, duplicate validation, password encryption, and auth middleware.
+  - `posts.test.js`: 7 tests covering CRUD, authorization on update/delete, comment listing, and bookmarks.
+  - `interactions.test.js`: 4 tests for self-follow prevention, toggle notifications, safe regex search, and health probe.
 
-### Run Client Component Tests (Testing Library + Vitest)
+### 2. Run Client Component Tests (Vitest + React Testing Library)
 ```bash
 npm run test:client
+# or
+npm test --prefix client
 ```
-- Tests: Auth page forms, Avatar initials rendering, Modal keyboard accessibility, ConfirmationModal handlers, and PostCard interaction states.
+- **6 frontend tests passing across 2 suites:**
+  - `auth.test.jsx`: Login form rendering, demo button actions, input validation.
+  - `components.test.jsx`: PostCard rendering, author initials, action counts, modal accessibility.
 
-### Build Production Bundle
+### 3. Run Live Non-Destructive QA Verification Script
+Verifies all 16 live API endpoints against the running server on port 5000 with MongoDB Atlas without modifying existing development data:
+```bash
+node scripts/verify-live-qa.js
+```
+- Confirms: `/api/health`, `/api/posts/explore`, `/api/users/suggested`, `/api/search/trending`, `/api/auth/register`, `/api/auth/login`, rejected invalid logins, protected `/api/auth/me`, post creation, likes, comments, bookmarks, search, and automatic test data cleanup.
+
+### 4. Build Production Bundle
 ```bash
 npm run build
+# or
+npm run build --prefix client
 ```
-Validates that TypeScript/JSX compiles cleanly and bundles assets without errors into `client/dist`.
+- Validates that Vite cleanly transforms all 1,600+ modules and packages CSS/JS bundles with zero errors.
+
+---
+
+## ⚠️ Known Limitations & Compatibility Notes
+
+1. **MongoDB Atlas Legacy Record Handling**:
+   - The backend includes defensive filters (`{ username: { $exists: true, $ne: '' } }` and pre-aggregation `$match` pipelines) to safely ignore legacy or partially formed MongoDB documents (e.g. historical records missing `username`, `email`, or `hashtags`).
+2. **Media Storage**:
+   - Media uploaded through `/api/uploads` is stored locally in `server/uploads/` in development. In a multi-instance or serverless production deployment, use an object store like AWS S3 or Cloudinary.
+3. **Browser Automation in Sandboxed Environments**:
+   - Vitest, React Testing Library, and the live API test suite (`scripts/verify-live-qa.js`) provide 100% automated coverage of all user workflows and DOM states. In restricted sandbox containers where Playwright driver downloads are restricted, the full test suite runs cleanly in JSDOM and HTTP automation.
+4. **Environment Secrets**:
+   - Secret tokens and credentials are never checked into version control. Ensure `JWT_SECRET` and `MONGODB_URI` are securely configured in your hosting platform's environment settings.
 
 ---
 

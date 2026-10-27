@@ -81,9 +81,24 @@ export async function getPostComments(req, res, next) {
 
     const total = await Comment.countDocuments({ post: postId });
 
+    const defaultAuthor = {
+      displayName: 'Community Member',
+      username: 'member',
+      avatar: '',
+      isVerified: false,
+    };
+
+    const safeComments = comments.map((c) => {
+      const obj = c.toObject ? c.toObject() : c;
+      return {
+        ...obj,
+        author: obj.author || defaultAuthor,
+      };
+    });
+
     return res.status(200).json({
       success: true,
-      comments,
+      comments: safeComments,
       page,
       limit,
       total,

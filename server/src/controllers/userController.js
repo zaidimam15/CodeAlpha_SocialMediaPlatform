@@ -152,10 +152,15 @@ export async function getSuggestedUsers(req, res, next) {
     if (currentUserId) {
       excludeIds.push(currentUserId);
       const following = await Follow.find({ follower: currentUserId }).select('following');
-      excludeIds.push(...following.map((f) => f.following));
+      excludeIds.push(
+        ...following.map((f) => f.following).filter(Boolean)
+      );
     }
 
-    const suggestions = await User.find({ _id: { $nin: excludeIds } })
+    const suggestions = await User.find({
+      _id: { $nin: excludeIds },
+      username: { $exists: true, $ne: '' },
+    })
       .sort({ followersCount: -1, createdAt: -1 })
       .limit(6)
       .select('username displayName avatar bio isVerified followersCount');

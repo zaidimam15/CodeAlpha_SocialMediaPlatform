@@ -60,13 +60,26 @@ export async function getBookmarks(req, res, next) {
     const postIds = validPosts.map((p) => p._id);
 
     const userLikes = await Like.find({ user: userId, post: { $in: postIds } }).select('post');
-    const likedSet = new Set(userLikes.map((l) => l.post.toString()));
+    const likedSet = new Set(
+      userLikes.filter((l) => l && l.post).map((l) => l.post.toString())
+    );
 
-    const enriched = validPosts.map((p) => ({
-      ...p.toObject(),
-      isLiked: likedSet.has(p._id.toString()),
-      isBookmarked: true,
-    }));
+    const defaultAuthor = {
+      displayName: 'Community Member',
+      username: 'member',
+      avatar: '',
+      isVerified: false,
+    };
+
+    const enriched = validPosts.map((p) => {
+      const obj = p.toObject ? p.toObject() : p;
+      return {
+        ...obj,
+        author: obj.author || defaultAuthor,
+        isLiked: p._id ? likedSet.has(p._id.toString()) : false,
+        isBookmarked: true,
+      };
+    });
 
     return res.status(200).json({
       success: true,

@@ -22,6 +22,7 @@ export async function search(req, res, next) {
 
     if (type === 'users' || type === 'all') {
       users = await User.find({
+        username: { $exists: true, $ne: '' },
         $or: [{ username: safeRegex }, { displayName: safeRegex }],
       })
         .limit(10)
@@ -51,7 +52,19 @@ export async function search(req, res, next) {
 export async function getTrendingHashtags(req, res, next) {
   try {
     const trending = await Post.aggregate([
-      { $unwind: '$hashtags' },
+      {
+        $match: {
+          hashtags: { $exists: true, $type: 'array', $ne: [] },
+        },
+      },
+      {
+        $unwind: '$hashtags',
+      },
+      {
+        $match: {
+          hashtags: { $type: 'string', $ne: '' },
+        },
+      },
       {
         $group: {
           _id: '$hashtags',

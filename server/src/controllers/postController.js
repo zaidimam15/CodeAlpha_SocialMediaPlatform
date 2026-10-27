@@ -33,29 +33,48 @@ function extractHashtags(text) {
 }
 
 async function attachUserInteractions(posts, currentUserId) {
-  if (!currentUserId || !posts.length) {
+  if (!posts || !posts.length) return [];
+
+  const defaultAuthor = {
+    displayName: 'Community Member',
+    username: 'member',
+    avatar: '',
+    isVerified: false,
+  };
+
+  if (!currentUserId) {
     return posts.map((p) => {
       const obj = p.toObject ? p.toObject() : p;
-      return { ...obj, isLiked: false, isBookmarked: false };
+      return {
+        ...obj,
+        author: obj.author || defaultAuthor,
+        isLiked: false,
+        isBookmarked: false,
+      };
     });
   }
 
-  const postIds = posts.map((p) => p._id);
+  const postIds = posts.map((p) => p._id).filter(Boolean);
 
   const [likes, bookmarks] = await Promise.all([
     Like.find({ user: currentUserId, post: { $in: postIds } }).select('post'),
     Bookmark.find({ user: currentUserId, post: { $in: postIds } }).select('post'),
   ]);
 
-  const likedSet = new Set(likes.map((l) => l.post.toString()));
-  const bookmarkedSet = new Set(bookmarks.map((b) => b.post.toString()));
+  const likedSet = new Set(
+    likes.filter((l) => l && l.post).map((l) => l.post.toString())
+  );
+  const bookmarkedSet = new Set(
+    bookmarks.filter((b) => b && b.post).map((b) => b.post.toString())
+  );
 
   return posts.map((p) => {
     const obj = p.toObject ? p.toObject() : p;
     return {
       ...obj,
-      isLiked: likedSet.has(p._id.toString()),
-      isBookmarked: bookmarkedSet.has(p._id.toString()),
+      author: obj.author || defaultAuthor,
+      isLiked: p._id ? likedSet.has(p._id.toString()) : false,
+      isBookmarked: p._id ? bookmarkedSet.has(p._id.toString()) : false,
     };
   });
 }
