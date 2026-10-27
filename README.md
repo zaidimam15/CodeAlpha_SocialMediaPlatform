@@ -1,5 +1,13 @@
 # ⚡ Connectify — Premium Full-Stack Social Networking Platform
 
+🚀 **Connectify — Social Media Platform**
+
+🌐 **Live Website:** https://code-alpha-social-media-platform-9v.vercel.app/
+
+⚙️ **Backend API:** https://codealpha-socialmediaplatform-ck55.onrender.com
+
+💻 **GitHub Repository:** https://github.com/zaidimam15/CodeAlpha_SocialMediaPlatform
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-v24.x-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-v18.x-blue.svg)](https://reactjs.org/)
